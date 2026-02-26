@@ -30,7 +30,8 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  // GitHub Pages 需要使用 base URL
+  history: createWebHistory('/Travel-route-planning/'),
   routes
 })
 

@@ -12,5 +12,18 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  // GitHub Pages 配置
+  base: '/Travel-route-planning/',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    // 确保静态资源正确引用
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   }
 })
