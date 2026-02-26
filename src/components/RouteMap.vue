@@ -1,9 +1,41 @@
 <template>
-  <div class="china-map">
-    <div ref="mapContainer" class="map-container"></div>
-    <div v-if="loading" class="map-loading">
-      <div class="loading-spinner"></div>
-      <p>{{ loadingMessage }}</p>
+  <div class="route-map">
+    <div class="map-header">
+      <h3>旅行路线地图</h3>
+      <p class="map-hint">显示您规划的旅行路线</p>
+    </div>
+    <div class="map-wrapper">
+      <div class="map-visual">
+        <div class="china-map-container">
+          <div ref="mapContainer" class="amap-container"></div>
+          <div v-if="loading" class="map-loading">
+            <div class="loading-spinner"></div>
+            <p>{{ loadingMessage }}</p>
+          </div>
+        </div>
+
+        <!-- 目的地列表 -->
+        <div class="destinations-panel" v-if="destinations.length > 0">
+          <h4>目的地列表</h4>
+          <div class="destination-list">
+            <div
+              v-for="(dest, index) in destinations"
+              :key="index"
+              class="destination-item"
+              @click="focusOnDestination(dest)"
+            >
+              <span class="destination-number">{{ index + 1 }}</span>
+              <span class="destination-name">{{ dest }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 空状态 -->
+        <div class="empty-state" v-else>
+          <div class="empty-icon">🗺️</div>
+          <p>添加目的地后，地图将显示路线</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -70,7 +102,6 @@ const initMap = async () => {
     loading.value = false
     console.log('地图初始化成功')
 
-    // 更新地图标记
     updateMarkers()
   } catch (error) {
     console.error('地图初始化失败:', error)
@@ -151,11 +182,20 @@ const updateMarkers = () => {
           mapInstance.value.add(polyline)
           polylines.value.push(polyline)
 
-          // 自动调整视野以包含所有标记
           mapInstance.value.setFitView()
         }
       }
     }
+  }
+}
+
+// 聚焦到特定目的地
+const focusOnDestination = (destination) => {
+  if (!mapInstance.value || !window.AMap) return
+
+  const coords = getCoordinates(destination)
+  if (coords) {
+    mapInstance.value.setZoomAndCenter(10, coords)
   }
 }
 
@@ -164,14 +204,12 @@ watch(() => props.destinations, () => {
   updateMarkers()
 }, { deep: true })
 
-// 组件挂载时初始化地图
 onMounted(() => {
   setTimeout(() => {
     initMap()
   }, 100)
 })
 
-// 组件卸载时清理资源
 onUnmounted(() => {
   clearMarkersAndPolylines()
   if (mapInstance.value) {
@@ -182,17 +220,54 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.china-map {
+.route-map {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.map-header {
+  padding: 15px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.map-header h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.2rem;
+}
+
+.map-hint {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.map-wrapper {
+  flex: 1;
+  overflow: auto;
+}
+
+.map-visual {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: white;
+}
+
+.china-map-container {
+  flex: 1;
+  min-width: 400px;
   position: relative;
 }
 
-.map-container {
+.amap-container {
   width: 100%;
-  height: 100%;
-  min-height: 500px;
-  background-color: #f5f7fa;
+  height: 600px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f5f7fa;
 }
 
 .map-loading {
@@ -228,5 +303,104 @@ onUnmounted(() => {
   color: #666;
   font-size: 14px;
   margin: 0;
+}
+
+.destinations-panel {
+  width: 250px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  height: fit-content;
+}
+
+.destinations-panel h4 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1rem;
+}
+
+.destination-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.destination-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.destination-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.destination-number {
+  width: 24px;
+  height: 24px;
+  background: #667eea;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.destination-name {
+  color: #333;
+  font-size: 0.9rem;
+  flex: 1;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #e0e0e0;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  color: #999;
+  font-size: 1rem;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .map-visual {
+    flex-direction: column;
+  }
+
+  .china-map-container {
+    min-width: 100%;
+  }
+
+  .destinations-panel {
+    width: 100%;
+  }
+
+  .amap-container {
+    height: 400px;
+  }
 }
 </style>

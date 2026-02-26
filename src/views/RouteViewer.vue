@@ -18,7 +18,7 @@
       <div class="viewer-content">
         <div class="route-map-section">
           <div class="map-container">
-            <ChinaMap :destinations="route.destinations" />
+            <RouteMap :destinations="route.destinations" />
           </div>
         </div>
 
@@ -79,7 +79,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute as useRouter, useRouter as useNavigation } from 'vue-router'
-import ChinaMap from '@/components/ChinaMap.vue'
+import RouteMap from '@/components/RouteMap.vue'
 
 const route = useRouter()
 const router = useNavigation()

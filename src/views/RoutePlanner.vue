@@ -71,7 +71,7 @@
 
       <div class="planner-map">
         <div class="map-container">
-          <ChinaMap :destinations="destinations" />
+          <RouteMap :destinations="destinations" />
         </div>
       </div>
     </div>
@@ -80,7 +80,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import ChinaMap from '@/components/ChinaMap.vue'
+import RouteMap from '@/components/RouteMap.vue'
 
 const routeName = ref('')
 const newDestination = ref('')
